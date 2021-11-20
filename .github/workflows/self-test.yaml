@@ -4,6 +4,11 @@ name: Self-Test
 on:
   push: ~
 
+env:
+  CACHE_REGISTRY: ghcr.io
+  CACHE_IMAGE: ${{ github.repository }}
+  CACHE_TAG: release-cache
+
 jobs:
   test:
     name: Test
@@ -14,7 +19,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v1
         with:
-          registry: 'ghcr.io'
+          registry: ${{ env.CACHE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -35,6 +40,9 @@ jobs:
         uses: ./save
         with:
           paths: "${{ github.workspace }}/target /usr/share/something"
+          registry: ${{ env.CACHE_REGISTRY }}
+          image: ${{ env.CACHE_IMAGE }}
+          tag: ${{ env.CACHE_TAG }}
 
       - name: Print cache
         run: |
@@ -47,7 +55,9 @@ jobs:
       - name: Restore cache
         uses: ./restore
         with:
-          image: ${{ steps.save_cache.outputs.image-name }}
+          registry: ${{ env.CACHE_REGISTRY }}
+          image: ${{ env.CACHE_IMAGE }}
+          tag: ${{ env.CACHE_TAG }}
 
       - name: Assert cache
         run: |

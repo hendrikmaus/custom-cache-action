@@ -25,10 +25,10 @@ Then try to **restore an existing cache** image:
 - name: Restore cache
   uses: hendrikmaus/custom-cache-action/restore@master
   with:
-    image: "ghcr.io/owner/repository:cache-latest"
+    registry: 'ghcr.io'
+    image: 'owner/repository'
+    tag: 'cache-latest'
 ```
-
-*You'll define how the image is called when storing it; see below.*
 
 After work is done, **save a cache** and push it:
 

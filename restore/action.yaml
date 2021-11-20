@@ -1,9 +1,18 @@
 name: 'Cache::restore'
 description: 'Restore a custom cache from a container image'
 inputs:
-  image:
-    description: 'Container image to pull; make sure the workflow is authenticated'
+  registry:
+    description: 'Container registry to use; make sure the workflow is authenticated'
     required: true
+    default: 'ghcr.io'
+  image:
+    description: 'Container image name to use'
+    required: true
+    default: ${{ github.repository }}
+  tag:
+    description: 'Container image tag to use'
+    required: true
+    default: 'cache-latest'
 runs:
   using: "composite"
   steps:
@@ -13,7 +22,7 @@ runs:
         tempdir=$(mktemp -d)
         cd "${tempdir}"
 
-        image=${{ inputs.image }}
+        image=${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}
 
         if ! docker pull "${image}" &>/dev/null; then
           echo "No cache found"
