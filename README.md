@@ -34,8 +34,7 @@ After work is done, **save a cache** and push it:
 
 ```yaml
 - name: Save cache
-  id: save_cache
-  uses: ./save
+  uses: hendrikmaus/custom-cache-action/save@master
   with:
     paths: "${{ github.workspace }}/something /path/to/something/else"
     registry: 'ghcr.io'
