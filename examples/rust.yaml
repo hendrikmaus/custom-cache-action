@@ -1,0 +1,59 @@
+---
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+env:
+  CACHE_REGISTRY: ghcr.io
+  CACHE_IMAGE: ${{ github.repository }}
+  CACHE_TAG: release-cache
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.CACHE_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Restore cache
+        uses: hendrikmaus/custom-cache-action/restore@master
+        with:
+          registry: ${{ env.CACHE_REGISTRY }}
+          image: ${{ env.CACHE_IMAGE }}
+          tag: ${{ env.CACHE_TAG }}
+
+      - name: Compile
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+
+      # ... additional release steps
+
+      - name: Save cache
+        uses: hendrikmaus/custom-cache-action/save@master
+        with:
+          paths: "${{ github.workspace }}/target /usr/share/rust/.cargo/registry/index /usr/share/rust/.cargo/registry/cache"
+          registry: ${{ env.CACHE_REGISTRY }}
+          image: ${{ env.CACHE_IMAGE }}
+          tag: ${{ env.CACHE_TAG }}

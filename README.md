@@ -41,3 +41,9 @@ After work is done, **save a cache** and push it:
     image: 'owner/repository'
     tag: 'cache-latest'
 ```
+
+## Examples
+
+*Please do not hesitate to contribute another example to the list.*
+
+- [Rust](./examples/rust.yaml)
