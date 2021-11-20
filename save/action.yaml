@@ -16,10 +16,6 @@ inputs:
     description: 'Container image tag to use'
     required: true
     default: 'cache-latest'
-outputs:
-  image-name:
-    description: 'Fully qualified image name the cache was pushed at'
-    value: ${{ steps.image_name.outputs.name }}
 runs:
   using: "composite"
   steps:
@@ -41,8 +37,3 @@ runs:
         echo "building cache container image"
         docker build --tag "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}" --file Dockerfile .
         docker push "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}"
-
-    - id: image_name
-      shell: bash
-      run: |
-        echo "::set-output name=name::${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}"
