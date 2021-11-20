@@ -1,0 +1,58 @@
+---
+name: Save Test
+
+on:
+  push: ~
+
+jobs:
+  test:
+    name: Save
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: 'ghcr.io'
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create something to cache
+        run: |
+          mkdir -p target \
+            && echo 'hello, target!' > target/payload.txt
+          mkdir -p /usr/share/something \
+            && echo 'hello, /usr/share/something!' > /usr/share/something/payload.txt
+
+          ls -la target \
+            && cat target/payload.txt
+          ls -la /usr/share/something \
+            && cat /usr/share/something/payload.txt
+
+      - name: Save cache
+        id: save_cache
+        uses: ./
+        with:
+          paths: "${{ github.workspace }}/target /usr/share/something"
+
+      - name: Print cache
+        run: |
+          echo "Cache saved as: ${{ steps.save_cache.outputs.image-name }}"
+
+      - name: Clear demo files
+        run: |
+          rm -rf target /usr/share/something
+
+      - name: Pull cache
+        run: |
+          cd $(mktemp -d)
+          docker pull ${{ steps.save_cache.outputs.image-name }}
+          docker create -ti --name cache ${{ steps.save_cache.outputs.image-name }} bash
+          docker cp cache:cache.tgz .
+          tar xpzf cache.tgz -P
+
+      - name: Assert cache
+        run: |
+          ls -la ./target
+          ls -la /usr/share/something

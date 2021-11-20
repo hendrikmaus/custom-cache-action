@@ -1,0 +1,30 @@
+name: 'Cache::restore'
+description: 'Restore a custom cache from a container image'
+inputs:
+  image:
+    description: 'Container image to pull; make sure the workflow is authenticated'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Restore cache
+      shell: bash
+      run: |
+        tempdir=$(mktemp -d)
+        cd "${tempdir}"
+
+        image=${{ inputs.image }}
+
+        if ! docker pull "${image}" &>/dev/null; then
+          echo "No cache found"
+          exit 0
+        fi
+
+        echo "creating cache container filesystem"
+        # this container isn't actually started; we just gain access to its filesystem
+        # it also does not contain 'bash", but we need to provide some argument, which is ignored
+        docker create -ti --name cache_storage "${image}" bash
+        docker cp cache_storage:cache.tgz .
+
+        echo "expanding cache to disk"
+        tar xpzf cache.tgz -P

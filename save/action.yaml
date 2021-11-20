@@ -1,0 +1,48 @@
+name: 'Cache::save'
+description: 'Save a custom cache as a container image'
+inputs:
+  paths:
+    description: 'Paths to include in the cache; space separated file list'
+    required: true
+  registry:
+    description: 'Container registry to use; make sure the workflow is authenticated'
+    required: true
+    default: 'ghcr.io'
+  image:
+    description: 'Container image name to use'
+    required: true
+    default: ${{ github.repository }}
+  tag:
+    description: 'Container image tag to use'
+    required: true
+    default: 'cache-latest'
+outputs:
+  image-name:
+    description: 'Fully qualified image name the cache was pushed at'
+    value: ${{ steps.image_name.outputs.name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Save cache
+      shell: bash
+      run: |
+        tempdir=$(mktemp -d)
+        cd "${tempdir}"
+
+        echo "building cache tarball"
+        tar -cpzf cache.tgz ${{ inputs.paths }} -P
+
+        cat <<-EOF > Dockerfile
+        FROM scratch
+        LABEL org.opencontainers.image.description="Release cache of ${GITHUB_REPOSITORY}"
+        COPY cache.tgz .
+        EOF
+
+        echo "building cache container image"
+        docker build --tag "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}" --file Dockerfile .
+        docker push "${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}"
+
+    - id: image_name
+      shell: bash
+      run: |
+        echo "::set-output name=name::${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}"
