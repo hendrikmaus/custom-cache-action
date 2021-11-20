@@ -51,5 +51,7 @@ jobs:
 
       - name: Assert cache
         run: |
-          ls -la ./target
-          ls -la /usr/share/something
+          ls -la target \
+            && cat target/payload.txt
+          ls -la /usr/share/something \
+            && cat /usr/share/something/payload.txt
