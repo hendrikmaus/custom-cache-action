@@ -26,8 +26,8 @@ Then try to **restore an existing cache** image:
   uses: hendrikmaus/custom-cache-action/restore@master
   with:
     registry: 'ghcr.io'
-    image: 'owner/repository'
-    tag: 'cache-latest'
+    image: ${{ github.repository }}
+    tag: 'cache'
 ```
 
 After work is done, **save a cache** and push it:
@@ -38,8 +38,8 @@ After work is done, **save a cache** and push it:
   with:
     paths: "${{ github.workspace }}/something /path/to/something/else"
     registry: 'ghcr.io'
-    image: 'owner/repository'
-    tag: 'cache-latest'
+    image: ${{ github.repository }}
+    tag: 'cache'
 ```
 
 ## Examples
