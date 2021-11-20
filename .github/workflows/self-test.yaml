@@ -36,17 +36,12 @@ jobs:
             && cat /usr/share/something/payload.txt
 
       - name: Save cache
-        id: save_cache
         uses: ./save
         with:
           paths: "${{ github.workspace }}/target /usr/share/something"
           registry: ${{ env.CACHE_REGISTRY }}
           image: ${{ env.CACHE_IMAGE }}
           tag: ${{ env.CACHE_TAG }}
-
-      - name: Print cache
-        run: |
-          echo "Cache saved as: ${{ steps.save_cache.outputs.image-name }}"
 
       - name: Clear demo files
         run: |
