@@ -14,8 +14,11 @@ inputs:
     required: true
     default: 'cache-latest'
 outputs:
+  cache_hit:
+    description: 'Boolean to indicate if a cache was found'
+    value: ${{ steps.restore.outputs.cache_hit }}
   tarball_path:
-    description: "Path to the tarball on disk"
+    description: 'Path to the tarball on disk'
     value: ${{ steps.restore.outputs.tarball_path }}
 runs:
   using: "composite"
@@ -30,6 +33,7 @@ runs:
         image=${{ inputs.registry }}/${{ inputs.image }}:${{ inputs.tag }}
 
         if ! docker pull "${image}" &>/dev/null; then
+          echo "::set-output name=cache_hit::false"
           echo "No cache found"
           exit 0
         fi
@@ -43,4 +47,5 @@ runs:
         echo "expanding cache to disk"
         tar xpzf cache.tgz -P
         
+        echo "::set-output name=cache_hit::true"
         echo "::set-output name=tarball_path::${tempdir}/cache.tgz"
