@@ -13,10 +13,15 @@ inputs:
     description: 'Container image tag to use'
     required: true
     default: 'cache-latest'
+outputs:
+  tarball_path:
+    description: "Path to the tarball on disk"
+    value: ${{ steps.restore.outputs.tarball_path }}
 runs:
   using: "composite"
   steps:
     - name: Restore cache
+      id: restore
       shell: bash
       run: |
         tempdir=$(mktemp -d)
@@ -37,3 +42,5 @@ runs:
 
         echo "expanding cache to disk"
         tar xpzf cache.tgz -P
+        
+        echo "::set-output name=tarball_path::${tempdir}/cache.tgz"
