@@ -40,7 +40,7 @@ runs:
 
         echo "creating cache container filesystem"
         # this container isn't actually started; we just gain access to its filesystem
-        # it also does not contain 'bash", but we need to provide some argument, which is ignored
+        # it also does not contain 'bash', but we need to provide some argument, which is ignored
         docker create -ti --name cache_storage "${image}" bash
         docker cp cache_storage:cache.tgz .
 
